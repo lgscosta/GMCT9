@@ -1,5 +1,5 @@
 {
-  "name": "gmct9",
+  "name": "exampleback",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -7,20 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon ./app.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/luanagabrielescosta/GMCT9.git"
-  },
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/luanagabrielescosta/GMCT9/issues"
-  },
-  "homepage": "https://github.com/luanagabrielescosta/GMCT9#readme",
   "dependencies": {
-    "body-parser": "^1.20.0",
+    "bcrypt": "^5.0.1",
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
+    "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.5.0"
   },
   "devDependencies": {

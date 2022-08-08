@@ -1,28 +1,68 @@
-exports.createUser = (req, res) => {
+const models = require('../models')
+const bcrypt = require('bcrypt')
+
+exports.createUser = async (req, res) => {
     const body = req.body
-    if (Object.keys(body).length === 0) return res.status(400).json({ message: "Não foi enviado nada no body" }) 
+    if (Object.keys(body).length === 0) return res.status(400).json({ message: "Campos obrigatórios" })
 
-    const { username, name, password } = body
+    const { username, name, password, confirmPassword, email } = body
 
 
-    if (username === undefined || password === undefined || name === undefined) return res.status(400).json({ message: "UserName, senha e nome são obrigatórios"})
+    if (!email) return res.status(422).json({ message: "E-mail é obrigatório" })
+    if (!username) return res.status(422).json({ message: "Usuário é obrigatório" })
+    if (!password) return res.status(422).json({ message: "Senha é obrigatório" })
+    if (!name) return res.status(422).json({ message: "Nome é obrigatório" })
+    if (!confirmPassword) return res.status(422).json({ message: "A confirmação de senha é obrigatório" })
 
-    const newUser = new User({ name, password, username });
-    newUser.save()
-    console.log({ newUser })
-    res.status(201).json({ message: "Usuário criado com sucesso" })
+    if (password !== confirmPassword) return res.status(422).json({ message: 'A confirmação de senha nao bate com a senha' })
+
+    // Verificando se o email ja existe
+    const userExist = await models.User.findOne({ email })
+    if (userExist) return res.status(422).json({ message: "E-mail já cadastrado" })
+
+    // Criando a senha encriptada
+    const salt = await bcrypt.genSalt(12)
+    const passwordHash = await bcrypt.hash(password, salt)
+
+
+    // Criando usuário
+    const user = new models.User({
+        name,
+        password: passwordHash,
+        username,
+        email
+    });
+    try {
+        
+        await user.save()
+        res.status(201).json({ message: "Usuário criado com sucesso" })
+    } catch (error) {
+        console.log({ error })
+        return res.status(500).json({ message: "Algo deu errado, tente novamente mais tarde!" })
+    }
 }
 
-exports.listUsers =  (req, res) => {
-    User.find().then(data => {
-        console.log({ data })
-        return  res.status(200).send({ message: " lista de usuários", data})
-    }).catch(error => res.status(500).send({ message: "erro ao resgatar a lista de usuários"}))
+exports.listUsers = async (req, res) => {
+
+    const users = await models.User.find({}, '-password')
+    
+    return res.status(200).send({ message: " lista de usuários", users })
 }
 
-exports.listUserById =  (req, res) => {
-    User.findById(req.params.id).then(data => {
-        console.log({ data })
-        return  res.status(200).send({ message: "Dados do usuários", data})
-    }).catch(error => res.status(500).send({ message: "erro ao resgatar a lista de usuários", error}))
+exports.listUserById = async (req, res) => {
+    const id = req.params.id
+
+    try {
+        const user = await models.User.findById(id, '-password')
+        console.log(!user)
+        return res.status(200).send({ message: "Dados do usuários", user })
+        
+    } catch (error) {
+        console.log({error})
+        return res.status(404).json({ msg: 'Usuário não encontrado'})
+        
+    }
+
+    
+    
 }

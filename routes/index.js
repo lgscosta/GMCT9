@@ -1,16 +1,19 @@
-const express = require('express');
-const users = require('./user');
+const express = require('express')
+const router = express.Router()
+const checkToken = require("../middlewares/checkToken")
+const user = require('./user')
+const login = require('./login')
 
-const router = express.Router();
-
-// Users routes
-router.get('/users', users.listUsers);
-router.get('/users/:id', users.listUserById);
-router.post('/users', users.createUser);
-
-//index
+// users
+router.get('/user', checkToken, user.listUsers)
+router.get('/user/:id',checkToken, user.listUserById)
+router.post('/user', user.createUser)
+// login
+router.post('/login', login.login)
+// Materias
 router.get('/', (req, res) => {
-    res.send('Hello World!')
-  })
+    return res.send('Essa pagina é a home')
+})
 
-module.exports = router;
+
+module.exports = router
